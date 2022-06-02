@@ -1,0 +1,139 @@
+:root {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+body {
+  background-color: #eee;
+  margin: 0;
+}
+
+/*----------- Header -----------*/
+header {
+  margin: 8px;
+  padding: 10px;
+  text-align: center;
+  font-weight: 400;
+  font-size: 1.6em;
+  font-family: "Ubuntu", sans-serif;
+  text-transform: capitalize;
+}
+
+/*+++++++++++ Game container +++++++++++*/
+#game {
+  margin-top: 25px;
+  width: 367px;
+  border-radius: 12px;
+  box-shadow: 4px 4px 18px #ddd, -3px -3px 13px #ddd;
+  background-color: #fff;
+}
+
+:is(.marker,button):active {
+  border: 1px solid #43c;
+  box-shadow: 2px 2px 3px #98c;
+}
+
+/*----------- Players info -----------*/
+.players {
+  display: flex;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.players > section {
+  flex: 1;
+  text-align: center;
+}
+
+.player {
+  font-weight: 600;
+  font-size: 1.2em;
+  padding: 10px;
+}
+
+.marker {
+  padding: 4px 68px;
+  border-radius: 4px;
+  font-weight: 400;
+  font-size: 1.4em;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/*----------- Game board -----------*/
+#gameBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  place-content: center center;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/*----------- Display winner -----------*/
+#winner {
+  text-align: center;
+  padding: 5px;
+  margin: 7px 20px;
+  font-weight: 500;
+  font-size: 18px;
+  color: #76c;
+  font-family: sans-serif;
+  text-transform: capitalize;
+}
+
+/*----------- Game spots -----------*/
+#gameBoard > div {
+  border: 2px solid #aaa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 5em;
+  font-family: sans-serif;
+  font-weight: 400;
+  padding: 0;
+  color: #aaa;
+}
+
+div:is(#spot1, #spot2, #spot3) {
+  border-top: none;
+}
+
+div:is(#spot1, #spot4, #spot7) {
+  border-left: none;
+}
+
+div:is(#spot3, #spot6, #spot9) {
+  border-right: none;
+}
+
+div:is(#spot7, #spot8, #spot9) {
+  border-bottom: none;
+}
+
+.spot:active {
+  text-shadow: 2px 2px 4px #98c;
+}
+
+/*----------- Game Controls-----------*/
+#gameControls {
+  padding: 18px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+#gameControls button {
+  text-align: center;
+  color: #fff;
+  display: block;
+  border: none;
+}
+
+button#replay {
+  padding: 7px 25px;
+  border-radius: 6px;
+  font-weight: 400;
+}
+
