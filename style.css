@@ -5,7 +5,7 @@
 }
 
 body {
-  background-color: #eee;
+  background-color: #e2d5d8;
   margin: 0;
 }
 
@@ -18,14 +18,14 @@ header {
   font-size: 1.6em;
   font-family: "Ubuntu", sans-serif;
   text-transform: capitalize;
+  color: whi;
 }
 
 /*+++++++++++ Game container +++++++++++*/
 #game {
-  margin-top: 25px;
-  width: 367px;
+  margin-top: 12px;
   border-radius: 12px;
-  box-shadow: 4px 4px 18px #ddd, -3px -3px 13px #ddd;
+  box-shadow: 4px 4px 8px #887f7f;
   background-color: #fff;
 }
 
@@ -38,7 +38,7 @@ header {
 .players {
   display: flex;
   padding: 12px;
-  margin-bottom: 10px;
+  gap: 6px;
 }
 
 .players > section {
@@ -53,12 +53,13 @@ header {
 }
 
 .marker {
-  padding: 4px 68px;
-  border-radius: 4px;
+  padding: 4px;
+  border-radius: 6px;
   font-weight: 400;
   font-size: 1.4em;
-  text-align: center;
-  vertical-align: middle;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /*----------- Game board -----------*/
@@ -67,7 +68,7 @@ header {
   grid-template-columns: repeat(3, 80px);
   grid-template-rows: repeat(3, 80px);
   place-content: center center;
-  padding: 30px;
+  padding: 12px;
   box-sizing: border-box;
 }
 
@@ -75,7 +76,6 @@ header {
 #winner {
   text-align: center;
   padding: 5px;
-  margin: 7px 20px;
   font-weight: 500;
   font-size: 18px;
   color: #76c;
@@ -85,7 +85,7 @@ header {
 
 /*----------- Game spots -----------*/
 #gameBoard > div {
-  border: 2px solid #aaa;
+  border: 2px solid #555;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -118,7 +118,7 @@ div:is(#spot7, #spot8, #spot9) {
 
 /*----------- Game Controls-----------*/
 #gameControls {
-  padding: 18px;
+  padding: 9px 18px;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
