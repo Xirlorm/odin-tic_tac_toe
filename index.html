@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./script.js" defer></script>
+    <title>Tic Tac Toe</title>
+  </head>
+
+  <body>
+    <h1>Tic Tac Toe</h1>
+    <p class="game-status">Player 1's turn</p>
+    <div class="scoreboard">
+      <div id="player1"">
+        <div class="player-name">Player 1</div>
+        <div class="player-score">0</div>
+      </div>
+      <div id="player2">
+        <div class="player-name">Player 2</div>
+        <div class="player-score">0</div>
+      </div>
+    </div>
+    <dialog class="player-info-dialog">
+      <form>
+        <div id="player1-info">
+          <label for="player-name">Enter Player Name</label><br />
+          <input type="text" class="player-name" required />
+        </div>
+        <div id="player2-selector">
+          <h2>VS</h2>
+          <div>
+            <input type="button" value="Player 2" id="player2-btn" />
+            <input type="button" value="Computer" id="computer-btn" />
+          </div>
+        </div>
+        <div id="player2-info">
+          <label for="player2-name">Enter Player 2 Name</label><br />
+          <input type="text" class="player2-name" />
+        </div>
+        <div id="submit-btn">
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </dialog>
+    <div class="gameboard">
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+      <div class="cell"></div>
+    </div>
+    <div class="reset-btn-container">
+      <button type="button" id="reset-btn">Reset Game</button>
+    </div>
+  </body>
+</html>

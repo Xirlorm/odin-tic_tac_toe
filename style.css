@@ -1,0 +1,171 @@
+body {
+  background-color: #041932;
+  color: #ebe1e1;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  margin: 0.2rem 0.6rem;
+}
+
+.gameboard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 3px;
+  width: 280px;
+  height: 300px;
+  margin: 0.4rem;
+}
+
+.cell.marked-x {
+  background-image: url(./icons/close.svg);
+}
+
+.cell.marked-o {
+  background-image: url(./icons/circle-outline.svg);
+}
+
+dialog {
+  padding: 2rem;
+}
+
+dialog::backdrop {
+  backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+input {
+  width: 200px;
+  padding: 0.4rem;
+  margin-top: 0.3rem;
+  background-color: #0e2142;
+  font-size: 1.2rem;
+}
+
+input[type="button"] {
+  max-width: min-content;
+  padding-inline: 2rem;
+}
+
+#player2-selector h2 {
+  text-align: center;
+}
+
+#player2-selector > div {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+#player2-selector label {
+  display: flex;
+  align-items: center;
+}
+
+#submit-btn {
+  display: flex;
+  justify-content: center;
+  margin: 1rem;
+}
+
+#submit-btn button {
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+}
+
+.scoreboard {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  color: #ad9ae3;
+}
+
+.scoreboard > div {
+  display: inline-flex;
+  flex-direction: row;
+  gap: 0.1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.player-name {
+  text-transform: capitalize;
+}
+
+.game-status {
+  color: #b4e6a6;
+  font-size: 1.1rem;
+  margin: 0.3rem;
+}
+
+.active-player {
+  border: 2px solid #264e95;
+  border-radius: 0.4rem;
+  color: #ffffff;
+}
+
+.active-player .player-name {
+  font-weight: bold;
+}
+
+.active-player .player-score {
+  background-color: #264e95;
+}
+
+.reset-btn-container {
+  margin-top: 0.4rem;
+}
+
+#reset-btn {
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Grouped selectors */
+.cell,
+dialog {
+  background-color: #122b57;
+  border-radius: 0.4rem;
+}
+
+.cell.marked-x,
+.cell.marked-o {
+  background-color: transparent;
+}
+
+dialog,
+input {
+  border-radius: 0.4rem;
+  color: #ebe1e1;
+  border: none;
+  outline: none;
+}
+
+#player2-selector,
+#player2-info {
+  display: none;
+}
+
+#submit-btn button,
+#reset-btn {
+  background-color: #204e9c;
+  color: #ebe1e1;
+  border: none;
+  border-radius: 0.4rem;
+}
+
+.scoreboard .player-name,
+.scoreboard .player-score {
+  font-size: 1.1rem;
+  padding: 0.2rem 0.6rem;
+  margin: 0;
+}
