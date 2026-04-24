@@ -70,13 +70,17 @@ input[type="button"] {
   align-items: center;
 }
 
-#submit-btn {
+.selected {
+  background-color: #204e9c;
+}
+
+.submit-btn-container {
   display: flex;
   justify-content: center;
   margin: 1rem;
 }
 
-#submit-btn button {
+.submit-btn-container button {
   padding: 0.4rem 0.8rem;
   font-size: 1rem;
 }
@@ -155,7 +159,7 @@ input {
   display: none;
 }
 
-#submit-btn button,
+.submit-btn-container button,
 #reset-btn {
   background-color: #204e9c;
   color: #ebe1e1;
