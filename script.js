@@ -1,10 +1,28 @@
+// Shuffle a given array in place
+function shuffle(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+}
+
 // Player constructor function,
 // If the player is a computer, it will have a method to make a move.
 function Player(name, score) {
   if (!new.target) {
     return Error('Player constructor was not called with "new"');
   } else if (name === "Computer") {
-    this.recentMoves = [];
+    this.recentMoves = []; // Keep track of recent moves make by computer
     this.winningMoves = [
       [0, 1, 2],
       [3, 4, 5],
@@ -14,24 +32,54 @@ function Player(name, score) {
       [2, 5, 8],
       [0, 4, 8],
       [2, 4, 6],
-    ];
+    ]; // All possible winning combinations
+
     this.makeMove = function (gameboard) {
+      // Shuffle the winning moves to add unpredicatability to the computer's moves
+      this.winningMoves.forEach((move) => shuffle(move));
+      shuffle(this.winningMoves);
+
       let nextMove;
 
-      for (let i = 0; i < this.winningMoves.length; i++) {
-        const move = this.winningMoves[i];
-        const playerMoves = move.filter((cell) =>
-          this.recentMoves.includes(cell),
-        );
-        if (playerMoves.length === 2) {
-          nextMove = move.find((cell) => !this.recentMoves.includes(cell));
-          if (nextMove !== undefined && gameboard[nextMove] === "") {
-            return nextMove;
+      if (this.recentMoves.length > 0) {
+        for (let i = 0; i < this.winningMoves.length; i++) {
+          let move;
+
+          do {
+            move = this.winningMoves[i];
+          } while (
+            !move.some(
+              (cell) =>
+                gameboard.board[cell] === gameboard.firstPlayer.marker ||
+                gameboard.board[cell] === "",
+            )
+          );
+
+          this.winningMoves[i];
+          const playerMoves = move.filter(
+            (cell) =>
+              this.recentMoves.includes(cell) ||
+              gameboard.board[cell] === gameboard.firstPlayer.marker,
+          ); // Filter out the winning move that the computer has already made
+          if (playerMoves.length > 0) {
+            nextMove = move.find((cell) => !this.recentMoves.includes(cell));
+            if (nextMove !== undefined && gameboard.board[nextMove] === "") {
+              this.recentMoves.push(nextMove);
+              return nextMove;
+            }
           }
         }
       }
 
-      return Math.floor(Math.random()) * 9;
+      // Make a random move if no winning move is found or if there
+      // is no recent move.
+      do {
+        nextMove = Math.floor(Math.random() * 9);
+      } while (gameboard.board[nextMove] !== "");
+
+      this.recentMoves.push(nextMove);
+
+      return nextMove;
     };
   }
 
@@ -115,8 +163,8 @@ function ui(callbacks) {
   const gameStatusElement = document.querySelector(".game-status");
   const player1NameElement = document.querySelector("#player1 .name");
   const player2NameElement = document.querySelector("#player2 .name");
-  const player1ScoreElement = document.querySelector("#player1 .player-score");
-  const player2ScoreElement = document.querySelector("#player2 .player-score");
+  const player1ScoreElement = document.querySelector("#player1 .score");
+  const player2ScoreElement = document.querySelector("#player2 .score");
   const player2Selector = document.getElementById("player2-selector");
   let isPlayer2Computer = undefined;
 
@@ -152,6 +200,14 @@ function ui(callbacks) {
     onSubmit();
   });
 
+  gameBoardElement.addEventListener("click", (e) => {
+    if (e.target.classList.contains("cell")) {
+      const cellIndex = Array.from(gameBoardElement.children).indexOf(e.target);
+      const { onCellClick } = callbacks;
+      onCellClick(cellIndex);
+    }
+  });
+
   return {
     showDialog: () => playerInfoInputDialog.showModal(),
     hideDialog: () => playerInfoInputDialog.close(),
@@ -166,13 +222,24 @@ function ui(callbacks) {
       player2NameElement.textContent = player2Name;
     },
     updatePlayerScores: (player1Score, player2Score) => {
-      player1ScoreElement.textContent = player1Score;
-      player2ScoreElement.textContent = player2Score;
+      player1ScoreElement.textContent = `${player1Score}`;
+      player2ScoreElement.textContent = `${player2Score}`;
+    },
+    markSpot: (cellIndex, marker) => {
+      const cell = gameBoardElement.children[cellIndex];
+      if (marker === "X") {
+        cell.classList.add("marked-x");
+      } else if (marker === "O") {
+        cell.classList.add("marked-o");
+      }
+    },
+    updateGameStatus: (message) => {
+      gameStatusElement.textContent = message;
     },
   };
 }
 
-(function() {
+(function () {
   let player1 = undefined;
   let player2 = undefined;
   let gameBoard = undefined;
@@ -184,9 +251,79 @@ function ui(callbacks) {
       player1 = new Player(player1, 0);
       player2 = new Player(player2, 0);
       gameBoard = new gameboard(player1, player2);
+
       gameBoard.assignMarkers();
-      console.log(gameBoard);
+      gameBoard.currentPlayer = gameBoard.firstPlayer;
+      uiController.updatePlayerNames(player1.name, player2.name);
+      uiController.updateGameStatus(`${gameBoard.currentPlayer.name}'s turn`);
+    },
+    onCellClick: (cellIndex) => {
+      if (gameboard.roundWinner) {
+        return;
+      }
+
+      if (!gameBoard.makeMove(cellIndex)) {
+        return;
+      }
+      uiController.markSpot(cellIndex, gameBoard.currentPlayer.marker);
+
+      if (gameBoard.checkWin()) {
+        gameBoard.currentPlayer.score++;
+        uiController.updateGameStatus(`${gameBoard.currentPlayer.name} wins!`);
+        uiController.updatePlayerScores(
+          gameBoard.firstPlayer.score,
+          gameBoard.secondPlayer.score,
+        );
+        gameboard.roundWinner = gameBoard.currentPlayer;
+        return;
+      }
+
+      gameBoard.currentPlayer =
+        gameBoard.currentPlayer === gameBoard.firstPlayer
+          ? gameBoard.secondPlayer
+          : gameBoard.firstPlayer;
+
+      if (gameBoard.currentPlayer.name === "Computer") {
+        let computerMove = gameBoard.currentPlayer.makeMove(gameBoard);
+        while (!gameBoard.makeMove(computerMove)) {
+          computerMove = gameBoard.currentPlayer.makeMove(gameBoard);
+        }
+        uiController.markSpot(computerMove, gameBoard.currentPlayer.marker);
+
+        if (gameBoard.checkWin()) {
+          gameBoard.currentPlayer.score++;
+          uiController.updateGameStatus(
+            `${gameBoard.currentPlayer.name} wins!`,
+          );
+          uiController.updatePlayerScores(
+            gameBoard.firstPlayer.score,
+            gameBoard.secondPlayer.score,
+          );
+          gameboard.roundWinner = gameBoard.currentPlayer;
+
+          if (gameBoard.board.filter((cell) => cell === "").length === 0) {
+            uiController.updateGameStatus("It's a tie!");
+            gameBoard.roundWinner = "tie";
+            return;
+          }
+          return;
+        }
+
+        gameBoard.currentPlayer =
+          gameBoard.currentPlayer === gameBoard.firstPlayer
+            ? gameBoard.secondPlayer
+            : gameBoard.firstPlayer;
+      }
+
+      if (gameBoard.board.filter((cell) => cell === "").length === 0) {
+        uiController.updateGameStatus("It's a tie!");
+        gameBoard.roundWinner = "tie";
+        return;
+      } else {
+        uiController.updateGameStatus(`${gameBoard.currentPlayer.name}'s turn`);
+      }
     },
   });
+
   uiController.showDialog();
 })();
