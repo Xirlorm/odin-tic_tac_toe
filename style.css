@@ -25,11 +25,11 @@ h1 {
 }
 
 .cell.marked-x {
-  background-image: url(./icons/close.svg);
+  background-image: url(./icons/x-mark.svg);
 }
 
 .cell.marked-o {
-  background-image: url(./icons/circle-outline.svg);
+  background-image: url(./icons/o-mark.svg);
 }
 
 dialog {
@@ -100,7 +100,8 @@ input[type="button"] {
   justify-content: space-between;
 }
 
-.name {
+.name,
+.game-status {
   text-transform: capitalize;
 }
 
