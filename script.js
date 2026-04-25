@@ -16,13 +16,25 @@ function shuffle(array) {
   }
 }
 
-// Player constructor function,
-// If the player is a computer, it will have a method to make a move.
+// Check if a  given combination will result in a win
+function comboPossible(combo, gameboard, marker) {
+  let possible = true;
+  const markers = combo.map((index) => gameboard[index]);
+
+  markers.forEach((cell) => {
+    if (cell !== "" && cell !== marker) {
+      possible = false;
+    }
+  });
+
+  return possible;
+}
+
+// Player constructor function, If the player is a computer, it will have a method to make a move.
 function Player(name, score) {
   if (!new.target) {
     return Error('Player constructor was not called with "new"');
   } else if (name === "Computer") {
-    this.recentMoves = []; // Keep track of recent moves make by computer
     this.winningMoves = [
       [0, 1, 2],
       [3, 4, 5],
@@ -33,52 +45,41 @@ function Player(name, score) {
       [0, 4, 8],
       [2, 4, 6],
     ]; // All possible winning combinations
+    this.recentMoves = []; // Keep track of recent moves make by computer
+    this.recentWinningMoves = null;
 
     this.makeMove = function (gameboard) {
-      // Shuffle the winning moves to add unpredicatability to the computer's moves
-      this.winningMoves.forEach((move) => shuffle(move));
-      shuffle(this.winningMoves);
-
       let nextMove;
+      this.winningMoves = this.winningMoves.filter((combo) =>
+        comboPossible(combo, gameboard, this.marker),
+      );
 
-      if (this.recentMoves.length > 0) {
-        for (let i = 0; i < this.winningMoves.length; i++) {
-          let move;
-
-          do {
-            move = this.winningMoves[i];
-          } while (
-            !move.some(
-              (cell) =>
-                gameboard.board[cell] === gameboard.firstPlayer.marker ||
-                gameboard.board[cell] === "",
-            )
-          );
-
-          this.winningMoves[i];
-          const playerMoves = move.filter(
-            (cell) =>
-              this.recentMoves.includes(cell) ||
-              gameboard.board[cell] === gameboard.firstPlayer.marker,
-          ); // Filter out the winning move that the computer has already made
-          if (playerMoves.length > 0) {
-            nextMove = move.find((cell) => !this.recentMoves.includes(cell));
-            if (nextMove !== undefined && gameboard.board[nextMove] === "") {
-              this.recentMoves.push(nextMove);
-              return nextMove;
-            }
-          }
-        }
-      }
-
-      // Make a random move if no winning move is found or if there
-      // is no recent move.
       do {
-        nextMove = Math.floor(Math.random() * 9);
-      } while (gameboard.board[nextMove] !== "");
+        if (
+          this.winningMoves.length > 0 &&
+          this.recentMoves.length > 0 &&
+          this.recentMoves.length < 3
+        ) {
+          if (
+            this.recentWinningMoves !== null &&
+            comboPossible(this.recentWinningMoves, gameboard, this.marker)
+          ) {
+            nextMove = this.recentWinningMoves.find(
+              (move) => gameboard[move] === "",
+            );
+          } else {
+            const randomCombo =
+              this.winningMoves[
+                Math.floor(Math.random() * this.winningMoves.length)
+              ];
+            nextMove = randomCombo.find((index) => gameboard[index] === "");
+            this.recentWinningMoves = randomCombo;
+          }
+        } else nextMove = Math.floor(Math.random() * 9);
+      } while (gameboard[nextMove] !== "");
 
+      shuffle(this.winningMoves);
       this.recentMoves.push(nextMove);
-
       return nextMove;
     };
   }
@@ -118,6 +119,7 @@ function gameboard(firstPlayer, secondPlayer) {
     resetGameboard: function () {
       // Reset the gameboard state for a new game
       this.board = ["", "", "", "", "", "", "", "", ""];
+      this.roundWinner = undefined;
     },
     checkWin: function () {
       // Check for winning combinations
@@ -208,6 +210,14 @@ function ui(callbacks) {
     }
   });
 
+  resetBtn.addEventListener("click", () => {
+    Array.from(gameBoardElement.children).forEach((cell) => {
+      cell.classList.remove("marked-x", "marked-o");
+    });
+    const { onReset } = callbacks;
+    onReset();
+  });
+
   return {
     showDialog: () => playerInfoInputDialog.showModal(),
     hideDialog: () => playerInfoInputDialog.close(),
@@ -240,11 +250,37 @@ function ui(callbacks) {
 }
 
 (function () {
-  let player1 = undefined;
-  let player2 = undefined;
-  let gameBoard = undefined;
+  let player1 = undefined; // Player 1 instance
+  let player2 = undefined; // Player 2 instance
+  let gameBoard = undefined; // Gameboard instance
+
+  function handleMove(cellIndex) {
+    uiController.markSpot(cellIndex, gameBoard.currentPlayer.marker);
+
+    if (gameBoard.checkWin()) {
+      gameBoard.currentPlayer.score++;
+      uiController.updateGameStatus(`${gameBoard.currentPlayer.name} wins!`);
+      uiController.updatePlayerScores(
+        gameBoard.firstPlayer.score,
+        gameBoard.secondPlayer.score,
+      );
+      gameBoard.roundWinner = gameBoard.currentPlayer;
+      gameBoard.currentPlayer = null;
+      return;
+    } else if (gameBoard.board.filter((cell) => cell === "").length === 0) {
+      uiController.updateGameStatus("It's a tie!");
+      gameBoard.roundWinner = "tie";
+      gameBoard.currentPlayer = null;
+      return;
+    }
+    gameBoard.currentPlayer =
+      gameBoard.currentPlayer === gameBoard.firstPlayer
+        ? gameBoard.secondPlayer
+        : gameBoard.firstPlayer;
+  }
 
   const uiController = ui({
+    // Callback on Playwer info submission
     onSubmit: () => {
       // Initialize players and gameboard based on user input
       ({ player1, player2 } = uiController.getPlayerNames());
@@ -257,73 +293,30 @@ function ui(callbacks) {
       uiController.updatePlayerNames(player1.name, player2.name);
       uiController.updateGameStatus(`${gameBoard.currentPlayer.name}'s turn`);
     },
+    // Callback on cell click by player(s)
     onCellClick: (cellIndex) => {
-      if (gameboard.roundWinner) {
-        return;
-      }
+      if (gameboard.roundWinner) return;
+      if (!gameBoard.makeMove(cellIndex)) return;
 
-      if (!gameBoard.makeMove(cellIndex)) {
-        return;
-      }
-      uiController.markSpot(cellIndex, gameBoard.currentPlayer.marker);
-
-      if (gameBoard.checkWin()) {
-        gameBoard.currentPlayer.score++;
-        uiController.updateGameStatus(`${gameBoard.currentPlayer.name} wins!`);
-        uiController.updatePlayerScores(
-          gameBoard.firstPlayer.score,
-          gameBoard.secondPlayer.score,
-        );
-        gameboard.roundWinner = gameBoard.currentPlayer;
-        return;
-      }
-
-      gameBoard.currentPlayer =
-        gameBoard.currentPlayer === gameBoard.firstPlayer
-          ? gameBoard.secondPlayer
-          : gameBoard.firstPlayer;
+      handleMove(cellIndex);
 
       if (gameBoard.currentPlayer.name === "Computer") {
-        let computerMove = gameBoard.currentPlayer.makeMove(gameBoard);
+        let computerMove = gameBoard.currentPlayer.makeMove(gameBoard.board);
         while (!gameBoard.makeMove(computerMove)) {
-          computerMove = gameBoard.currentPlayer.makeMove(gameBoard);
+          computerMove = gameBoard.currentPlayer.makeMove(gameBoard.board);
         }
-        uiController.markSpot(computerMove, gameBoard.currentPlayer.marker);
-
-        if (gameBoard.checkWin()) {
-          gameBoard.currentPlayer.score++;
-          uiController.updateGameStatus(
-            `${gameBoard.currentPlayer.name} wins!`,
-          );
-          uiController.updatePlayerScores(
-            gameBoard.firstPlayer.score,
-            gameBoard.secondPlayer.score,
-          );
-          gameboard.roundWinner = gameBoard.currentPlayer;
-
-          if (gameBoard.board.filter((cell) => cell === "").length === 0) {
-            uiController.updateGameStatus("It's a tie!");
-            gameBoard.roundWinner = "tie";
-            return;
-          }
-          return;
-        }
-
-        gameBoard.currentPlayer =
-          gameBoard.currentPlayer === gameBoard.firstPlayer
-            ? gameBoard.secondPlayer
-            : gameBoard.firstPlayer;
+        handleMove(computerMove);
       }
 
-      if (gameBoard.board.filter((cell) => cell === "").length === 0) {
-        uiController.updateGameStatus("It's a tie!");
-        gameBoard.roundWinner = "tie";
-        return;
-      } else {
-        uiController.updateGameStatus(`${gameBoard.currentPlayer.name}'s turn`);
-      }
+      uiController.updateGameStatus(`${gameBoard.currentPlayer.name}'s turn`);
+    },
+    // Callback on reseet button click
+    onReset: () => {
+      gameBoard.resetGameboard();
+      gameBoard.currentPlayer = gameBoard.firstPlayer;
+      uiController.updateGameStatus(`${gameBoard.currentPlayer.name}'s turn`);
     },
   });
 
-  uiController.showDialog();
+  uiController.showDialog(); // Show the player info input dialog when the page loads
 })();
